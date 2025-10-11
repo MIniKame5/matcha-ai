@@ -5,7 +5,7 @@ let chatHistory = [{ role: 'ai', text: 'AIモデルをロード中です。し�
 const requiredFileName = 'AI_data.matcha'; 
 const encryptionSalt = 'matcha-kame-salt'; // 暗号化のソルト（秘密鍵の一部）
 let generator = null; 
-const modelName = 'Xenova/phi-3-mini-4k-instruct'; 
+const modelName = 'Xenova/TinyLlama-1.1B-Chat-v1.0'; 
 
 // ==========================================================
 // B. DOM操作とメッセージ表示
@@ -124,10 +124,9 @@ function saveChatData() {
 
     try {
         const dataToEncrypt = JSON.stringify(chatHistory);
-        const encrypted = CryptoJS.AES.encrypt(dataToEncrypt, password, { 
-            keySize: 256 / 8, 
-            salt: encryptionSalt 
-        }).toString();
+// ★★★ 修正箇所：オプションをシンプルにして安定性を高める ★★★
+        const encrypted = CryptoJS.AES.encrypt(dataToEncrypt, password).toString();
+        // ★★★ 修正終わり ★★★
 
         const blob = new Blob([encrypted], { type: 'text/plain' });
         
@@ -238,4 +237,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // ファイル選択後に実際に読み込み処理を実行
     document.getElementById('load-file-input').addEventListener('change', loadChatData);
 });
+
 
