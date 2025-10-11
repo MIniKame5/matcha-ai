@@ -1,12 +1,12 @@
 // ==========================================================
 // A. 状態と設定
 // ==========================================================
-// ... (省略) ...
+let chatHistory = [{ role: 'ai', text: 'AIモデルをロード中です。しばらくお待ちください。' }];
+const requiredFileName = 'AI_data.matcha'; 
 const encryptionSalt = 'matcha-kame-salt'; // 暗号化のソルト（秘密鍵の一部）
-let generator = null;  
-// ★★★ 修正箇所：Phi-3 から TinyLlama に変更！ ★★★
+let generator = null; 
+// ★★★ 修正箇所1: TinyLlama モデルに切り替え済み！ ★★★
 const modelName = 'Xenova/TinyLlama-1.1B-Chat-v1.0'; 
-// ... (以下省略なし)
 
 // ==========================================================
 // B. DOM操作とメッセージ表示
@@ -41,11 +41,16 @@ function clearChatWindow() {
 async function loadAI() {
     document.getElementById('status-message').textContent = 'AIモデルをロード中...（初回は数分かかる場合があります）';
     try {
-        // ★★★ 最終修正箇所：2.17.2 に変更済み！これで Phi-3 のサポートが有効になるよ！ ★★★
+        // バージョン 2.17.2 に戻し、import URL も一致させているか確認してね！
         const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
         
         // パイプラインを初期化してモデルをロード
-        generator = await pipeline('text-generation', modelName);
+        // ★★★ 修正箇所2: localModel: false を追加し、インターネットからモデルをダウンロードさせる！ ★★★
+        generator = await pipeline('text-generation', modelName, {
+            localModel: false, // モデルをローカルフォルダではなくHugging Faceからダウンロードさせる
+            revision: 'quantized', // 量子化された小さなモデルを選ぶ（高速化）
+        });
+        // ★★★ 修正終わり ★★★
         
         document.getElementById('status-message').textContent = 'AIモデルのロードが完了しました！質問できます。';
         document.getElementById('user-input').disabled = false;
@@ -125,7 +130,7 @@ function saveChatData() {
 
     try {
         const dataToEncrypt = JSON.stringify(chatHistory);
-// ★★★ 修正箇所：オプションをシンプルにして安定性を高める ★★★
+        // ★★★ 修正箇所3: オプションを削除して暗号化を安定させる！ ★★★
         const encrypted = CryptoJS.AES.encrypt(dataToEncrypt, password).toString();
         // ★★★ 修正終わり ★★★
 
@@ -175,11 +180,8 @@ function loadChatData() {
         try {
             const encryptedText = event.target.result;
             
-            // 復号化を試みる
-            const bytes  = CryptoJS.AES.decrypt(encryptedText, password, { 
-                keySize: 256 / 8, 
-                salt: encryptionSalt 
-            });
+            // 復号化を試みる (保存側でオプションを削除したので、復号側でもオプションを削除)
+            const bytes  = CryptoJS.AES.decrypt(encryptedText, password); 
             const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
             
             if (!decryptedText) {
@@ -238,6 +240,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // ファイル選択後に実際に読み込み処理を実行
     document.getElementById('load-file-input').addEventListener('change', loadChatData);
 });
-
-
-
