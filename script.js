@@ -3,8 +3,8 @@
 // ==========================================================
 // ... (中略) ...
 let generator = null; 
-// ★★★ 修正箇所：-v1.0 を削除！ ★★★
-const modelName = 'Xenova/TinyLlama-1.1B-Chat'; // <- これ！
+// ★★★ 修正箇所：TinyLlama-1.1B-Chat から TinyLlama-v0.0 に変更！ ★★★
+const modelName = 'Xenova/TinyLlama-v0.0'; // <- これで公開モデルを使う！
 // ==========================================================
 // B. DOM操作とメッセージ表示
 // ==========================================================
@@ -237,5 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ファイル選択後に実際に読み込み処理を実行
     document.getElementById('load-file-input').addEventListener('change', loadChatData);
 });
+
 
 
