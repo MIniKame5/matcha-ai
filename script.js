@@ -1,11 +1,12 @@
 // ==========================================================
 // A. 状態と設定
 // ==========================================================
-let chatHistory = [{ role: 'ai', text: 'AIモデルをロード中です。しばらくお待ちください。' }];
-const requiredFileName = 'AI_data.matcha'; 
+// ... (省略) ...
 const encryptionSalt = 'matcha-kame-salt'; // 暗号化のソルト（秘密鍵の一部）
-let generator = null; 
+let generator = null;  
+// ★★★ 修正箇所：Phi-3 から TinyLlama に変更！ ★★★
 const modelName = 'Xenova/TinyLlama-1.1B-Chat-v1.0'; 
+// ... (以下省略なし)
 
 // ==========================================================
 // B. DOM操作とメッセージ表示
@@ -237,5 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ファイル選択後に実際に読み込み処理を実行
     document.getElementById('load-file-input').addEventListener('change', loadChatData);
 });
+
 
 
