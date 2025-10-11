@@ -1,10 +1,13 @@
 // ==========================================================
 // A. 状態と設定
 // ==========================================================
-// ... (中略) ...
+let chatHistory = [{ role: 'ai', text: 'AIモデルをロード中です。しばらくお待ちください。' }]; 
+const requiredFileName = 'AI_data.matcha'; 
+const encryptionSalt = 'matcha-kame-salt'; // 暗号化のソルト（秘密鍵の一部）
 let generator = null; 
-// ★★★ 修正箇所：TinyLlama-1.1B-Chat から TinyLlama-v0.0 に変更！ ★★★
-const modelName = 'Xenova/rinna-3.6b-pqt'; // <- これで公開モデルを使う！
+// ★★★ 最終モデル決定！rinna-3.6b-pqt に変更済み！ ★★★
+const modelName = 'Xenova/rinna-3.6b-pqt'; 
+
 // ==========================================================
 // B. DOM操作とメッセージ表示
 // ==========================================================
@@ -38,14 +41,14 @@ function clearChatWindow() {
 async function loadAI() {
     document.getElementById('status-message').textContent = 'AIモデルをロード中...（初回は数分かかる場合があります）';
     try {
-        // バージョン 2.17.2 に戻し、import URL も一致させているか確認してね！
+        // バージョン 2.17.2 に固定！
         const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
         
         // パイプラインを初期化してモデルをロード
-        // ★★★ 修正箇所2: localModel: false を追加し、インターネットからモデルをダウンロードさせる！ ★★★
+        // ★★★ 最終修正：revision を 'main' に変更して、401エラーを回避！ ★★★
         generator = await pipeline('text-generation', modelName, {
-            localModel: false, // モデルをローカルフォルダではなくHugging Faceからダウンロードさせる
-            revision: 'quantized', // 量子化された小さなモデルを選ぶ（高速化）
+            localModel: false, // Hugging Faceからダウンロードさせる
+            revision: 'main', // 量子化ファイルではなく、メインの公開ファイルを使う
         });
         // ★★★ 修正終わり ★★★
         
@@ -127,7 +130,7 @@ function saveChatData() {
 
     try {
         const dataToEncrypt = JSON.stringify(chatHistory);
-        // ★★★ 修正箇所3: オプションを削除して暗号化を安定させる！ ★★★
+        // ★★★ 修正済み：オプションを削除して暗号化を安定させる！ ★★★
         const encrypted = CryptoJS.AES.encrypt(dataToEncrypt, password).toString();
         // ★★★ 修正終わり ★★★
 
@@ -237,7 +240,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // ファイル選択後に実際に読み込み処理を実行
     document.getElementById('load-file-input').addEventListener('change', loadChatData);
 });
-
-
-
-
