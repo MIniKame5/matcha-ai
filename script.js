@@ -40,8 +40,8 @@ function clearChatWindow() {
 async function loadAI() {
     document.getElementById('status-message').textContent = 'AIモデルをロード中...（初回は数分かかる場合があります）';
     try {
-        // ★★★ エラー対策の修正箇所：ここで transformers を非同期インポートするよ ★★★
-        const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+        // ★★★ 最終修正箇所：2.18.0 に変更済み！これで Phi-3 のサポートが有効になるよ！ ★★★
+        const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.18.0');
         
         // パイプラインを初期化してモデルをロード
         generator = await pipeline('text-generation', modelName);
@@ -131,7 +131,7 @@ function saveChatData() {
 
         const blob = new Blob([encrypted], { type: 'text/plain' });
         
-        // ★★★ 修正箇所：ファイルのダウンロード処理を安定させる方法 ★★★
+        // ファイルのダウンロード処理を安定させる方法
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         
@@ -146,8 +146,7 @@ function saveChatData() {
         // ダウンロード後のお掃除
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        // ★★★ 修正終わり ★★★
-
+        
         document.getElementById('status-message').textContent = '「' + requiredFileName + '」として保存されました！';
     } catch (e) {
         document.getElementById('status-message').textContent = '保存中にエラーが発生しました。（パスワードやファイル名を確認してね）';
