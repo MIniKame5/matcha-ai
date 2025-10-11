@@ -40,8 +40,8 @@ function clearChatWindow() {
 async function loadAI() {
     document.getElementById('status-message').textContent = 'AIモデルをロード中...（初回は数分かかる場合があります）';
     try {
-        // ★★★ 最終修正箇所：2.18.0 に変更済み！これで Phi-3 のサポートが有効になるよ！ ★★★
-        const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.18.0');
+        // ★★★ 最終修正箇所：2.17.2 に変更済み！これで Phi-3 のサポートが有効になるよ！ ★★★
+        const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
         
         // パイプラインを初期化してモデルをロード
         generator = await pipeline('text-generation', modelName);
@@ -238,3 +238,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // ファイル選択後に実際に読み込み処理を実行
     document.getElementById('load-file-input').addEventListener('change', loadChatData);
 });
+
