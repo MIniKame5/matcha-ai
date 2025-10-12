@@ -161,7 +161,10 @@ function saveChatData() {
 // ==========================================================
 function loadChatData() {
     const password = document.getElementById('save-password').value;
-    if (!password) { alert('パスワードを入力してください！'); return; }
+    if (!password) { 
+        alert('パスワードを入力してください！'); 
+        return; 
+    }
 
     const fileInput = document.getElementById('load-file-input');
     if (fileInput.files.length === 0) {
@@ -178,15 +181,24 @@ function loadChatData() {
             const encryptedText = event.target.result;
             
             // 復号化を試みる
-            const bytes  = CryptoJS.AES.decrypt(encryptedText, password); 
+            const bytes = CryptoJS.AES.decrypt(encryptedText, password); 
             const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
             
-            if (!decryptedText) {
+            // ★★★ ここが重要！復号に失敗すると、decryptedTextは空か、無効なJSONになる！ ★★★
+            if (!decryptedText || decryptedText.length === 0) {
+                // パスワードが間違っている、またはデータが壊れている
                 document.getElementById('status-message').textContent = 'エラー: パスワードが違うか、ファイルが壊れています。';
-                return;
+                // 処理をここで停止
+                return; 
             }
 
             const loadedHistory = JSON.parse(decryptedText);
+            
+            // さらに厳しくチェック：配列であること、中身があることを確認
+            if (!Array.isArray(loadedHistory) || loadedHistory.length === 0) {
+                document.getElementById('status-message').textContent = 'エラー: ファイルの内容が不正です。（履歴データ形式ではありません）';
+                return; 
+            }
             
             // 履歴を入れ替えて表示を更新
             chatHistory = loadedHistory;
@@ -195,7 +207,8 @@ function loadChatData() {
             
             document.getElementById('status-message').textContent = 'データを読み込みました！会話を再開できます。';
         } catch (e) {
-            document.getElementById('status-message').textContent = 'エラー: ファイルの内容を処理できませんでした。';
+            // JSON.parse() やその他の予期せぬエラーをキャッチ
+            document.getElementById('status-message').textContent = 'エラー: ファイルの内容を処理できませんでした。（データ形式が間違っている可能性があります）';
             console.error("読み込みエラー:", e);
         }
     };
@@ -206,7 +219,6 @@ function loadChatData() {
 
     reader.readAsText(file);
 }
-
 // ==========================================================
 // G. 初期化とイベントリスナー
 // ==========================================================
@@ -236,3 +248,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // ファイル選択後に実際に読み込み処理を実行
     document.getElementById('load-file-input').addEventListener('change', loadChatData);
 });
+
