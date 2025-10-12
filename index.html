@@ -3,38 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>まっちゃ AI - ローカルPhi-3</title>
-    <link rel="stylesheet" href="styles.css">
-    
+    <title>まっちゃAI - Phi-3-mini</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     
-    <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.0"></script> 
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        #chat-container { width: 90%; max-width: 800px; background-color: #fff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; height: 90vh; }
+        #chat-window { flex-grow: 1; padding: 20px; overflow-y: auto; background-color: #e6f7e9; }
+        #status-message { padding: 10px 20px; background-color: #e0f7fa; color: #00796b; font-weight: bold; text-align: center; border-bottom: 1px solid #c8e6c9; }
+        #input-area { padding: 15px; background-color: #ffffff; border-top: 1px solid #e0e0e0; display: flex; flex-direction: column; gap: 10px; }
+        #user-input { flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; resize: none; overflow: auto; }
+        #send-button { padding: 10px 15px; background-color: #4caf50; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; transition: background-color 0.3s; }
+        #send-button:hover:enabled { background-color: #388e3c; }
+        #send-button:disabled { background-color: #a5d6a7; cursor: not-allowed; }
+
+        .message-container { margin-bottom: 15px; display: flex; }
+        .message-content { padding: 10px 15px; border-radius: 18px; max-width: 80%; line-height: 1.6; word-wrap: break-word; }
+        
+        /* ユーザーメッセージ */
+        .user { justify-content: flex-end; }
+        .user .message-content { background-color: #d1e7dd; color: #155724; border-bottom-right-radius: 4px; }
+        
+        /* AIメッセージ */
+        .ai { justify-content: flex-start; }
+        .ai .message-content { background-color: #ffffff; color: #333; border: 1px solid #e0e0e0; border-bottom-left-radius: 4px; }
+
+        /* pre タグのスタイルをリセット */
+        .message-content pre { margin: 0; padding: 0; white-space: pre-wrap; word-break: break-all; font-family: inherit; }
+
+        #save-load-area { display: flex; gap: 10px; padding: 10px 15px; background-color: #f0f0f0; border-top: 1px solid #e0e0e0; align-items: center; }
+        #save-password { padding: 8px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; width: 100px; }
+        #save-button, #load-button { padding: 8px 12px; background-color: #00bcd4; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background-color 0.3s; }
+        #save-button:hover, #load-button:hover { background-color: #0097a7; }
+        #load-file-input { display: none; }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>まっちゃ AI (Phi-3-mini)</h1>
-        <p>このAIはあなたのPC内で動いています！データは暗号化してローカル保存できます。</p>
-    </header>
-    
-    <div id="chat-window">
+    <div id="chat-container">
+        <div id="status-message">AIモデルをロード中です。しばらくお待ちください。</div>
+        <div id="chat-window">
+            <div class="message-container ai">
+                <div class="message-content">
+                    <pre>AIモデルをロード中です。しばらくお待ちください。</pre>
+                </div>
+            </div>
+        </div>
+        
+        <div id="input-area">
+            <textarea id="user-input" placeholder="質問を入力..." rows="3" disabled></textarea>
+            <button id="send-button" disabled>送信</button>
         </div>
 
-    <div id="controls">
-        <input type="text" id="user-input" placeholder="質問を入力..." disabled>
-        <button id="send-button" disabled>送信</button>
-    </div>
-
-    <div id="file-management">
-        <h2>💾 データ管理 (AI_data.matcha)</h2>
-        <input type="password" id="save-password" placeholder="保存/読み込み用パスワード" required>
-        <button id="save-button">データを保存</button>
-        
-        <input type="file" id="load-file-input" accept=".matcha" style="display: none;">
-        <button id="load-button">データを読み込む</button>
-        <p id="status-message" style="color: #c0392b; font-weight: bold; margin-top: 10px;"></p>
+        <div id="save-load-area">
+            <label for="save-password">パスワード:</label>
+            <input type="password" id="save-password" placeholder="データ暗号化用" value="matcha-kame-pass">
+            <button id="save-button">データを保存</button>
+            
+            <input type="file" id="load-file-input" accept=".matcha">
+            <button id="load-button">データを読み込む</button>
+        </div>
     </div>
 
     <script type="module" src="script.js"></script>
 </body>
 </html>
-
