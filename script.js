@@ -5,8 +5,8 @@ let chatHistory = [{ role: 'ai', text: 'AIモデルをロード中です。し�
 const requiredFileName = 'AI_data.matcha'; 
 const encryptionSalt = 'matcha-kame-salt'; // 暗号化のソルト（秘密鍵の一部）
 let generator = null; 
-// ★★★ 最終モデル決定！rinna-3.6b-pqt に変更済み！ ★★★
-const modelName = 'Xenova/rinna-3.6b-pqt'; 
+// ★★★ 修正箇所1: Phi-3 モデルに戻す！ v3なら動くはず！ ★★★
+const modelName = 'Xenova/phi-3-mini-4k-instruct'; 
 
 // ==========================================================
 // B. DOM操作とメッセージ表示
@@ -41,14 +41,14 @@ function clearChatWindow() {
 async function loadAI() {
     document.getElementById('status-message').textContent = 'AIモデルをロード中...（初回は数分かかる場合があります）';
     try {
-        // バージョン 2.17.2 に固定！
-        const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+        // ★★★ 修正箇所2: v3のimport URLに変更！(index.htmlと揃える) ★★★
+        const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.0');
         
         // パイプラインを初期化してモデルをロード
-        // ★★★ 最終修正：revision を 'main' に変更して、401エラーを回避！ ★★★
+        // ★★★ 修正箇所3: revisionオプションを削除して、v3のデフォルト設定でアクセス！ ★★★
         generator = await pipeline('text-generation', modelName, {
             localModel: false, // Hugging Faceからダウンロードさせる
-            revision: 'main', // 量子化ファイルではなく、メインの公開ファイルを使う
+            // revision: 'quantized' などのオプションはv3で不要になった可能性があるので削除
         });
         // ★★★ 修正終わり ★★★
         
@@ -85,7 +85,7 @@ async function sendMessage() {
     displayMessage('ai', aiTextPlaceholder);
 
     try {
-        // 過去の会話をモデルの入力形式に整形 (シンプルな形式を使用)
+        // 過去の会話をモデルの入力形式に整形 (Phi-3のフォーマットは複雑なため、一旦シンプルな形式を使用)
         const formattedChat = chatHistory.map(msg => `${msg.role === 'user' ? 'ユーザー' : 'AI'}: ${msg.text}`).join('\n') + '\nAI:';
         
         // AI応答を生成
@@ -130,25 +130,22 @@ function saveChatData() {
 
     try {
         const dataToEncrypt = JSON.stringify(chatHistory);
-        // ★★★ 修正済み：オプションを削除して暗号化を安定させる！ ★★★
+        // 暗号化を安定させる
         const encrypted = CryptoJS.AES.encrypt(dataToEncrypt, password).toString();
-        // ★★★ 修正終わり ★★★
 
         const blob = new Blob([encrypted], { type: 'text/plain' });
         
-        // ファイルのダウンロード処理を安定させる方法
+        // ファイルのダウンロード処理
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         
         a.href = url;
         a.download = requiredFileName; 
         
-        // ユーザーのクリックイベントとして実行することで、ブロックされにくくする
         a.style.display = 'none'; 
         document.body.appendChild(a);
         a.click();
         
-        // ダウンロード後のお掃除
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         
@@ -180,12 +177,11 @@ function loadChatData() {
         try {
             const encryptedText = event.target.result;
             
-            // 復号化を試みる (保存側でオプションを削除したので、復号側でもオプションを削除)
+            // 復号化を試みる
             const bytes  = CryptoJS.AES.decrypt(encryptedText, password); 
             const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
             
             if (!decryptedText) {
-                // パスワードが間違っている、またはデータが壊れている
                 document.getElementById('status-message').textContent = 'エラー: パスワードが違うか、ファイルが壊れています。';
                 return;
             }
