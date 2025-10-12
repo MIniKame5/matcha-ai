@@ -5,10 +5,9 @@ let chatHistory = [{ role: 'ai', text: 'AIモデルをロード中です。し�
 const requiredFileName = 'AI_data.matcha'; 
 const encryptionSalt = 'matcha-kame-salt'; // 暗号化のソルト（秘密鍵の一部）
 let generator = null; 
-// ★★★ 安定版モデル：絶対動くT5-smallに変更！ ★★★
-const modelName = 'Xenova/t5-small'; 
+// ★★★ v3.0.0対応の軽量モデルに戻す！401はv3で解決済みのはず！ ★★★
+const modelName = 'Xenova/rinna-3.6b-pqt'; 
 // ★★★ 修正終わり ★★★
-
 // ==========================================================
 // B. DOM操作とメッセージ表示
 // ==========================================================
@@ -249,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ファイル選択後に実際に読み込み処理を実行
     document.getElementById('load-file-input').addEventListener('change', loadChatData);
 });
+
 
 
 
