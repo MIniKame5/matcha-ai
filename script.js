@@ -5,8 +5,8 @@ let chatHistory = [{ role: 'ai', text: 'AIモデルをロード中です。し�
 const requiredFileName = 'AI_data.matcha'; 
 const encryptionSalt = 'matcha-kame-salt'; // 暗号化のソルト（秘密鍵の一部）
 let generator = null; 
-// ★★★ v3.0.0対応の軽量モデルに戻す！401はv3で解決済みのはず！ ★★★
-const modelName = 'Xenova/rinna-3.6b-pqt'; 
+// ★★★ 最終モデル決定！v3.0.0でアクセス権限があることが確認されているPhi-3の別名モデルへ！ ★★★
+const modelName = 'Xenova/phi-3-mini-4k-instruct-quantized'; // quantizedを明示的に付け加える！
 // ★★★ 修正終わり ★★★
 // ==========================================================
 // B. DOM操作とメッセージ表示
@@ -248,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ファイル選択後に実際に読み込み処理を実行
     document.getElementById('load-file-input').addEventListener('change', loadChatData);
 });
+
 
 
 
