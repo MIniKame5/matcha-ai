@@ -29,6 +29,16 @@
             background-color: #7CB342;
             transform: translateY(-1px);
         }
+        /* チャットメッセージのスタイル */
+        .user-bubble {
+            background-color: #e6fffa; /* 薄い水色 */
+            border-bottom-right-radius: 0;
+        }
+        .ai-bubble {
+            background-color: var(--matcha-green); /* まっちゃ色 */
+            color: white;
+            border-bottom-left-radius: 0;
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
@@ -38,15 +48,20 @@
         <h1 class="text-3xl font-extrabold text-center mb-6" style="color: var(--matcha-dark);">
             まっちゃAI 🍵
         </h1>
-        <!-- 説明は削除されました -->
+        
+        <!-- 応答表示エリア（チャット履歴表示用） -->
+        <div class="mt-8 mb-6 h-96 overflow-y-auto p-4 border-2 border-gray-200 rounded-lg" id="chat_history_container">
+            <!-- ここに会話の履歴が積み重なるよ！ -->
+            <div class="text-center text-gray-500 my-4">さあ、質問を入力して、まっちゃAIと会話を始めよう！</div>
+        </div>
         
         <!-- 質問入力エリア -->
-        <div class="mb-6">
+        <div class="mb-4">
             <label for="input_field_id" class="block text-sm font-medium mb-2" style="color: var(--matcha-dark);">質問を入力してね！</label>
-            <textarea id="input_field_id" rows="4" 
-                      class="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-opacity-50" 
+            <textarea id="input_field_id" rows="2" 
+                      class="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-opacity-50 resize-none" 
                       style="border-color: var(--matcha-green); outline: none;" 
-                      placeholder=""></textarea> <!-- 例を削除しました -->
+                      placeholder=""></textarea>
         </div>
 
         <!-- 応答ボタン -->
@@ -55,17 +70,9 @@
             まっちゃAIに送信
         </button>
 
-        <!-- 応答表示エリア -->
-        <div class="mt-8">
-            <h2 class="text-xl font-bold mb-3" style="color: var(--matcha-dark);">AIからの応答：</h2>
-            <div id="output_area_id" 
-                 class="bg-gray-100 p-4 rounded-lg min-h-[100px] whitespace-pre-wrap text-gray-800">
-                ここにQwen2.5-0.5Bからの応答が表示されるよ...
-            </div>
-            <p id="loading_message" class="text-center text-orange-500 font-semibold mt-4 hidden">
-                🐢 AIが考えてるよ！少し待ってね...
-            </p>
-        </div>
+        <p id="loading_message" class="text-center text-orange-500 font-semibold mt-4 hidden">
+            🐢 AIが考えてるよ！少し待ってね...
+        </p>
 
     </div>
 
@@ -73,13 +80,37 @@
         // AIサーバーのアドレス
         const AI_SERVER_URL = 'http://localhost:8001/generate'; 
         
-        // IDを修正済み！HTMLとJavaScriptがこれで連携するよ！
+        // ★★★ 会話履歴を保持するリスト！これがAIの記憶だよ！ ★★★
+        let conversationHistory = []; 
+
         const inputField = document.getElementById('input_field_id');
-        const outputArea = document.getElementById('output_area_id');
+        const chatContainer = document.getElementById('chat_history_container'); // 履歴表示エリアに変更
         const loadingMessage = document.getElementById('loading_message');
         const submitButton = document.getElementById('submit_button');
 
-        // AIサーバーに質問を送信する関数 (ステップ8で書いたコードを実装！)
+        // メッセージをチャットエリアに追加するヘルパー関数
+        function addMessageToChat(role, content) {
+            const isUser = role === 'user';
+            const bubble = document.createElement('div');
+            bubble.className = `p-3 my-3 max-w-[85%] rounded-xl whitespace-pre-wrap ${isUser ? 'ml-auto user-bubble' : 'mr-auto ai-bubble'}`;
+            
+            const roleLabel = document.createElement('p');
+            roleLabel.className = `font-bold text-xs mb-1 ${isUser ? 'text-gray-600' : 'text-white'}`;
+            roleLabel.innerText = isUser ? 'あなた' : 'まっちゃAI';
+
+            const contentText = document.createElement('p');
+            contentText.innerText = content;
+
+            bubble.appendChild(roleLabel);
+            bubble.appendChild(contentText);
+            chatContainer.appendChild(bubble);
+
+            // スクロールを一番下にする
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+
+        // AIサーバーに質問を送信する関数
         async function sendQuestionToAI() {
             const prompt = inputField.value.trim();
             if (!prompt) {
@@ -87,15 +118,22 @@
                 return;
             }
             
+            // 1. 質問を履歴に追加＆画面に表示
+            addMessageToChat('user', prompt);
+            
+            // ★★★ 2. 履歴リストに現在のユーザーの質問を追加！ ★★★
+            conversationHistory.push({ role: 'user', content: prompt });
+            
             // UIをローディング中に切り替える
-            outputArea.innerText = '';
+            inputField.value = ''; // 入力欄をクリア
             loadingMessage.classList.remove('hidden');
             submitButton.disabled = true;
 
             const requestData = {
                 prompt: prompt,
                 max_tokens: 500,
-                temperature: 0.7 
+                temperature: 0.7,
+                history: conversationHistory // ★★★ 3. 履歴全体をリクエストに含める！ ★★★
             };
 
             try {
@@ -114,20 +152,36 @@
 
                 const data = await response.json();
                 
-                // AIからの応答を画面に表示！
+                // 4. AIからの応答を画面に表示！
                 const aiResponseText = data.response;
-                outputArea.innerText = aiResponseText; 
+                addMessageToChat('assistant', aiResponseText);
+
+                // ★★★ 5. AIの応答も履歴リストに追加して記憶を更新！ ★★★
+                conversationHistory.push({ role: 'assistant', content: aiResponseText });
 
             } catch (error) {
                 // 通信失敗！サーバーが起動しているか確認してね！
                 console.error('API通信エラー:', error);
-                outputArea.innerText = 'ごめん！AIサーバーと通信できなかったよ...😭 サーバー（Anaconda Promptの画面）が動いているか確認してね！';
+                const errorMessage = 'ごめん！AIサーバーと通信できなかったよ...😭 サーバー（Anaconda Promptの画面）が動いているか確認してね！';
+                addMessageToChat('assistant', errorMessage);
+                
+                // エラー時はユーザーの最後の質問を履歴から削除（未回答のため）
+                conversationHistory.pop();
+
             } finally {
                 // UIを元に戻す
                 loadingMessage.classList.add('hidden');
                 submitButton.disabled = false;
             }
         }
+
+        // Enterキーで送信できるようにする
+        inputField.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // 改行を防ぐ
+                sendQuestionToAI();
+            }
+        });
     </script>
 </body>
 </html>
