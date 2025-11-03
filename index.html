@@ -3,68 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>まっちゃAI - Phi-3-mini</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
-    
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.0"></script> 
+    <title>🍵 まっちゃAIクライアント (Qwen2.5-0.5B接続)</title>
+    <!-- Tailwind CSSを読み込んで、美しいUIを作るよ！ -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Arial', sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        #chat-container { width: 90%; max-width: 800px; background-color: #fff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; height: 90vh; }
-        #chat-window { flex-grow: 1; padding: 20px; overflow-y: auto; background-color: #e6f7e9; }
-        #status-message { padding: 10px 20px; background-color: #e0f7fa; color: #00796b; font-weight: bold; text-align: center; border-bottom: 1px solid #c8e6c9; }
-        #input-area { padding: 15px; background-color: #ffffff; border-top: 1px solid #e0e0e0; display: flex; flex-direction: column; gap: 10px; }
-        #user-input { flex-grow: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; resize: none; overflow: auto; }
-        #send-button { padding: 10px 15px; background-color: #4caf50; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; transition: background-color 0.3s; }
-        #send-button:hover:enabled { background-color: #388e3c; }
-        #send-button:disabled { background-color: #a5d6a7; cursor: not-allowed; }
-
-        .message-container { margin-bottom: 15px; display: flex; }
-        .message-content { padding: 10px 15px; border-radius: 18px; max-width: 80%; line-height: 1.6; word-wrap: break-word; }
-        
-        /* ユーザーメッセージ */
-        .user { justify-content: flex-end; }
-        .user .message-content { background-color: #d1e7dd; color: #155724; border-bottom-right-radius: 4px; }
-        
-        /* AIメッセージ */
-        .ai { justify-content: flex-start; }
-        .ai .message-content { background-color: #ffffff; color: #333; border: 1px solid #e0e0e0; border-bottom-left-radius: 4px; }
-
-        /* pre タグのスタイルをリセット */
-        .message-content pre { margin: 0; padding: 0; white-space: pre-wrap; word-break: break-all; font-family: inherit; }
-
-        #save-load-area { display: flex; gap: 10px; padding: 10px 15px; background-color: #f0f0f0; border-top: 1px solid #e0e0e0; align-items: center; }
-        #save-password { padding: 8px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; width: 100px; }
-        #save-button, #load-button { padding: 8px 12px; background-color: #00bcd4; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background-color 0.3s; }
-        #save-button:hover, #load-button:hover { background-color: #0097a7; }
-        #load-file-input { display: none; }
+        /* まっちゃ王国のテーマカラー */
+        :root {
+            --matcha-green: #9CCC65; /* ライムグリーン */
+            --matcha-dark: #689F38; /* オリーブグリーン */
+            --matcha-bg: #F9FFF7;   /* ほぼ白の背景 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--matcha-bg);
+        }
+        .matcha-card {
+            box-shadow: 0 10px 30px rgba(104, 159, 56, 0.3);
+            border: 1px solid var(--matcha-green);
+        }
+        .matcha-btn {
+            background-color: var(--matcha-dark);
+            transition: transform 0.1s;
+        }
+        .matcha-btn:hover {
+            background-color: #7CB342;
+            transform: translateY(-1px);
+        }
     </style>
 </head>
-<body>
-    <div id="chat-container">
-        <div id="status-message">AIモデルをロード中です。しばらくお待ちください。</div>
-        <div id="chat-window">
-            <div class="message-container ai">
-                <div class="message-content">
-                    <pre>AIモデルをロード中です。しばらくお待ちください。</pre>
-                </div>
-            </div>
-        </div>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- メインのAIチャットカード -->
+    <div class="matcha-card bg-white w-full max-w-2xl p-8 rounded-2xl">
+        <h1 class="text-3xl font-extrabold text-center mb-6" style="color: var(--matcha-dark);">
+            まっちゃAI 🍵
+        </h1>
+        <!-- 説明は削除されました -->
         
-        <div id="input-area">
-            <textarea id="user-input" placeholder="質問を入力..." rows="3" disabled></textarea>
-            <button id="send-button" disabled>送信</button>
+        <!-- 質問入力エリア -->
+        <div class="mb-6">
+            <label for="input_field_id" class="block text-sm font-medium mb-2" style="color: var(--matcha-dark);">質問を入力してね！</label>
+            <textarea id="input_field_id" rows="4" 
+                      class="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-opacity-50" 
+                      style="border-color: var(--matcha-green); outline: none;" 
+                      placeholder=""></textarea> <!-- 例を削除しました -->
         </div>
 
-        <div id="save-load-area">
-            <label for="save-password">パスワード:</label>
-            <input type="password" id="save-password" placeholder="データ暗号化用" value="matcha-kame-pass">
-            <button id="save-button">データを保存</button>
-            
-            <input type="file" id="load-file-input" accept=".matcha">
-            <button id="load-button">データを読み込む</button>
+        <!-- 応答ボタン -->
+        <button id="submit_button" onclick="sendQuestionToAI()" 
+                class="matcha-btn text-white w-full py-3 rounded-xl font-bold text-lg hover:shadow-lg">
+            まっちゃAIに送信
+        </button>
+
+        <!-- 応答表示エリア -->
+        <div class="mt-8">
+            <h2 class="text-xl font-bold mb-3" style="color: var(--matcha-dark);">AIからの応答：</h2>
+            <div id="output_area_id" 
+                 class="bg-gray-100 p-4 rounded-lg min-h-[100px] whitespace-pre-wrap text-gray-800">
+                ここにQwen2.5-0.5Bからの応答が表示されるよ...
+            </div>
+            <p id="loading_message" class="text-center text-orange-500 font-semibold mt-4 hidden">
+                🐢 AIが考えてるよ！少し待ってね...
+            </p>
         </div>
+
     </div>
 
-    <script type="module" src="script.js"></script>
+    <script>
+        // AIサーバーのアドレス
+        const AI_SERVER_URL = 'http://localhost:8001/generate'; 
+        
+        // IDを修正済み！HTMLとJavaScriptがこれで連携するよ！
+        const inputField = document.getElementById('input_field_id');
+        const outputArea = document.getElementById('output_area_id');
+        const loadingMessage = document.getElementById('loading_message');
+        const submitButton = document.getElementById('submit_button');
+
+        // AIサーバーに質問を送信する関数 (ステップ8で書いたコードを実装！)
+        async function sendQuestionToAI() {
+            const prompt = inputField.value.trim();
+            if (!prompt) {
+                alert('質問を入力してね！');
+                return;
+            }
+            
+            // UIをローディング中に切り替える
+            outputArea.innerText = '';
+            loadingMessage.classList.remove('hidden');
+            submitButton.disabled = true;
+
+            const requestData = {
+                prompt: prompt,
+                max_tokens: 500,
+                temperature: 0.7 
+            };
+
+            try {
+                // fetchで君のAIサーバーに接続！
+                const response = await fetch(AI_SERVER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTPエラー！ステータス: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // AIからの応答を画面に表示！
+                const aiResponseText = data.response;
+                outputArea.innerText = aiResponseText; 
+
+            } catch (error) {
+                // 通信失敗！サーバーが起動しているか確認してね！
+                console.error('API通信エラー:', error);
+                outputArea.innerText = 'ごめん！AIサーバーと通信できなかったよ...😭 サーバー（Anaconda Promptの画面）が動いているか確認してね！';
+            } finally {
+                // UIを元に戻す
+                loadingMessage.classList.add('hidden');
+                submitButton.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>
