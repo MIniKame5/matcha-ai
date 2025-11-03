@@ -3,185 +3,380 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍵 まっちゃAIクライアント (Qwen2.5-0.5B接続)</title>
-    <!-- Tailwind CSSを読み込んで、美しいUIを作るよ！ -->
+    <title>まっちゃAI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* まっちゃ王国のテーマカラー */
-        :root {
-            --matcha-green: #9CCC65; /* ライムグリーン */
-            --matcha-dark: #689F38; /* オリーブグリーン */
-            --matcha-bg: #F9FFF7;   /* ほぼ白の背景 */
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--matcha-bg);
+            /* 背景全体を薄いグリーンに */
+            background-color: #f0fff4; 
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
         }
-        .matcha-card {
-            box-shadow: 0 10px 30px rgba(104, 159, 56, 0.3);
-            border: 1px solid var(--matcha-green);
+        .container {
+            width: 100%;
+            max-width: 600px; /* UIに合わせて幅を少し狭く */
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05); /* 影を控えめに */
+            padding: 30px;
+            margin-top: 50px;
+            border: 1px solid #c6f6d5; /* 薄い緑の枠線を追加 */
         }
-        .matcha-btn {
-            background-color: var(--matcha-dark);
-            transition: transform 0.1s;
+        .header {
+            color: #38a169; /* Matcha Green */
+            text-align: center;
+            font-size: 2.25rem; /* 大きめのフォント */
+            font-weight: 700;
+            padding-bottom: 20px;
+            margin-bottom: 0px;
         }
-        .matcha-btn:hover {
-            background-color: #7CB342;
-            transform: translateY(-1px);
+        .chat-area {
+            height: 350px;
+            overflow-y: auto;
+            /* 枠線をなくし、背景は白に */
+            border: none; 
+            border-radius: 10px;
+            padding: 15px 0; /* 左右のパディングを減らす */
+            background-color: #ffffff;
+            margin-bottom: 10px;
         }
-        /* チャットメッセージのスタイル */
-        .user-bubble {
-            background-color: #e6fffa; /* 薄い水色 */
-            border-bottom-right-radius: 0;
+        /* チャットエリア内のメッセージの表示を調整 */
+        .message-user {
+            background-color: #e6fffa;
+            color: #2c7a7b;
+            padding: 8px 12px;
+            border-radius: 15px 15px 5px 15px;
+            margin-bottom: 10px;
+            max-width: 85%;
+            margin-left: auto;
+            text-align: left; /* ユーザーメッセージも左揃え */
+            font-size: 0.95rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        .ai-bubble {
-            background-color: var(--matcha-green); /* まっちゃ色 */
+        .message-ai {
+            background-color: #c6f6d5;
+            color: #38a169;
+            padding: 8px 12px;
+            border-radius: 15px 15px 15px 5px;
+            margin-bottom: 10px;
+            max-width: 85%;
+            margin-right: auto;
+            text-align: left;
+            font-size: 0.95rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .message-system {
+            text-align: center;
+            color: #a0aec0;
+            font-size: 0.8rem;
+            margin: 20px 0;
+            font-style: italic;
+        }
+        .input-prompt-label {
+            font-size: 0.9rem;
+            color: #4a5568;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        #input_field_id {
+            padding: 12px;
+            border: 1px solid #a0aec0; /* 灰色の枠線 */
+            border-radius: 5px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+        }
+        #input_field_id:focus {
+            border-color: #38a169;
+            box-shadow: 0 0 0 3px rgba(56, 161, 105, 0.3); /* フォーカス時の緑色の光 */
+            outline: none;
+        }
+        .button-primary {
+            /* 送信ボタンは全幅、画像の色に近づける */
+            background-color: #68b23c; 
             color: white;
-            border-bottom-left-radius: 0;
+            padding: 12px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .button-primary:hover:not(:disabled) {
+            background-color: #559330;
+        }
+        .button-primary:disabled {
+            background-color: #a3c988;
+            cursor: not-allowed;
+        }
+        /* 履歴クリアボタンは削除する (画像にないので) */
+        
+        #loading_message {
+            color: #38a169;
+            font-style: italic;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+        /* サーバー状態表示エリアを非表示にする */
+        .server-status {
+            display: none !important;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <!-- メインのAIチャットカード -->
-    <div class="matcha-card bg-white w-full max-w-2xl p-8 rounded-2xl">
-        <h1 class="text-3xl font-extrabold text-center mb-6" style="color: var(--matcha-dark);">
-            まっちゃAI 🍵
-        </h1>
-        
-        <!-- 応答表示エリア（チャット履歴表示用） -->
-        <div class="mt-8 mb-6 h-96 overflow-y-auto p-4 border-2 border-gray-200 rounded-lg" id="chat_history_container">
-            <!-- ここに会話の履歴が積み重なるよ！ -->
-            <div class="text-center text-gray-500 my-4">さあ、質問を入力して、まっちゃAIと会話を始めよう！</div>
+<div class="container">
+    <h1 class="header">まっちゃAI 🍵</h1>
+    
+    <!-- サーバー状態表示エリア (非表示) -->
+    <div id="server_status" class="server-status"></div>
+
+    <!-- チャット表示エリア -->
+    <div id="output_area_id" class="chat-area">
+        <div class="message-system">
+            さあ、質問を入力して、まっちゃAIと会話を始めよう！
         </div>
-        
-        <!-- 質問入力エリア -->
-        <div class="mb-4">
-            <label for="input_field_id" class="block text-sm font-medium mb-2" style="color: var(--matcha-dark);">質問を入力してね！</label>
-            <textarea id="input_field_id" rows="2" 
-                      class="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-opacity-50 resize-none" 
-                      style="border-color: var(--matcha-green); outline: none;" 
-                      placeholder=""></textarea>
-        </div>
-
-        <!-- 応答ボタン -->
-        <button id="submit_button" onclick="sendQuestionToAI()" 
-                class="matcha-btn text-white w-full py-3 rounded-xl font-bold text-lg hover:shadow-lg">
-            まっちゃAIに送信
-        </button>
-
-        <p id="loading_message" class="text-center text-orange-500 font-semibold mt-4 hidden">
-            🐢 AIが考えてるよ！少し待ってね...
-        </p>
-
     </div>
 
-    <script>
-        // AIサーバーのアドレス
-        const AI_SERVER_URL = 'http://localhost:8001/generate'; 
-        
-        // ★★★ 会話履歴を保持するリスト！これがAIの記憶だよ！ ★★★
-        let conversationHistory = []; 
+    <!-- 質問入力エリア -->
+    <label for="input_field_id" class="input-prompt-label">質問を入力してね！</label>
+    <div class="input-group">
+        <input type="text" id="input_field_id" placeholder="" class="text-base" onkeypress="handleKeyPress(event)">
+        <button id="submit_button" class="button-primary" onclick="sendQuestionToAI()">まっちゃAIに送信</button>
+    </div>
+    
+    <!-- 履歴クリアボタン (非表示にする) -->
+    <!-- <div class="flex justify-end">
+        <button id="clear_history_button" class="button-secondary text-sm" onclick="clearHistory()">
+            <span id="clear_history_text">🍵 履歴をクリア (0件)</span>
+        </button>
+    </div> -->
 
-        const inputField = document.getElementById('input_field_id');
-        const chatContainer = document.getElementById('chat_history_container'); // 履歴表示エリアに変更
-        const loadingMessage = document.getElementById('loading_message');
-        const submitButton = document.getElementById('submit_button');
+    <!-- ローディングメッセージ -->
+    <div id="loading_message" class="hidden">
+        AIが Core i7 の力で考えてるよ... 🍵💭
+    </div>
+</div>
 
-        // メッセージをチャットエリアに追加するヘルパー関数
-        function addMessageToChat(role, content) {
-            const isUser = role === 'user';
-            const bubble = document.createElement('div');
-            bubble.className = `p-3 my-3 max-w-[85%] rounded-xl whitespace-pre-wrap ${isUser ? 'ml-auto user-bubble' : 'mr-auto ai-bubble'}`;
-            
-            const roleLabel = document.createElement('p');
-            roleLabel.className = `font-bold text-xs mb-1 ${isUser ? 'text-gray-600' : 'text-white'}`;
-            roleLabel.innerText = isUser ? 'あなた' : 'まっちゃAI';
+<script>
+// --- 1. 定数と初期設定 ---
 
-            const contentText = document.createElement('p');
-            contentText.innerText = content;
+const HISTORY_STORAGE_KEY = 'matcha_ai_chat_history'; // LocalStorageのキー
+const SERVER_URL = `http://localhost:8001/generate`; 
 
-            bubble.appendChild(roleLabel);
-            bubble.appendChild(contentText);
-            chatContainer.appendChild(bubble);
+// UI要素の取得
+const inputField = document.getElementById('input_field_id');
+const outputArea = document.getElementById('output_area_id');
+const loadingMessage = document.getElementById('loading_message');
+const submitButton = document.getElementById('submit_button');
+// serverStatusとclearHistoryButtonはUIから削除/非表示にしたが、JavaScriptからはアクセスできるように残す
+const serverStatus = document.getElementById('server_status'); 
+// const clearHistoryButton = document.getElementById('clear_history_button');
+// const clearHistoryText = document.getElementById('clear_history_text');
 
-            // スクロールを一番下にする
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+// 会話履歴を保存するリスト (LocalStorageから初期化される)
+let conversationHistory = [];
+
+// --- 2. 履歴管理関数（LocalStorage関連） ---
+
+// 履歴をLocalStorageに保存する関数
+function saveHistory() {
+    try {
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(conversationHistory));
+        // updateHistoryCount(); // UIから件数表示を削除
+    } catch (e) {
+        console.error("LocalStorageへの保存に失敗しました:", e);
+    }
+}
+
+// 履歴をLocalStorageから読み込み、画面に表示する関数
+function initializeHistory() {
+    const storedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (storedHistory) {
+        try {
+            conversationHistory = JSON.parse(storedHistory);
+            // 履歴を画面に再描画
+            outputArea.innerHTML = ''; // 初期メッセージをクリア
+            conversationHistory.forEach(msg => {
+                displayMessage(msg.role, msg.content); 
+            });
+            outputArea.scrollTop = outputArea.scrollHeight;
+            // updateHistoryCount(); // UIから件数表示を削除
+            return true; // 履歴を読み込んだ
+        } catch (e) {
+            console.error("LocalStorageからの読み込みに失敗しました:", e);
+            conversationHistory = []; // 失敗したら初期化
+            return false;
         }
+    }
+    return false; // 履歴がなかった
+}
 
+// 履歴を完全にクリアする関数 (機能は残す)
+function clearHistory() {
+    if (confirm('本当に会話履歴をすべてクリアしますか？')) {
+        localStorage.removeItem(HISTORY_STORAGE_KEY);
+        conversationHistory = [];
+        outputArea.innerHTML = `
+            <div class="message-system">
+                さあ、質問を入力して、まっちゃAIと会話を始めよう！
+            </div>
+        `;
+        // updateHistoryCount(); // UIから件数表示を削除
+        outputArea.scrollTop = outputArea.scrollHeight;
+    }
+}
 
-        // AIサーバーに質問を送信する関数
-        async function sendQuestionToAI() {
-            const prompt = inputField.value.trim();
-            if (!prompt) {
-                alert('質問を入力してね！');
-                return;
-            }
-            
-            // 1. 質問を履歴に追加＆画面に表示
-            addMessageToChat('user', prompt);
-            
-            // ★★★ 2. 履歴リストに現在のユーザーの質問を追加！ ★★★
-            conversationHistory.push({ role: 'user', content: prompt });
-            
-            // UIをローディング中に切り替える
-            inputField.value = ''; // 入力欄をクリア
-            loadingMessage.classList.remove('hidden');
-            submitButton.disabled = true;
+/* // 履歴の件数を更新する関数 (UIから削除)
+function updateHistoryCount() {
+    const count = conversationHistory.length;
+    clearHistoryText.innerText = `🍵 履歴をクリア (${count}件)`;
+} */
 
-            const requestData = {
-                prompt: prompt,
-                max_tokens: 500,
-                temperature: 0.7,
-                history: conversationHistory // ★★★ 3. 履歴全体をリクエストに含める！ ★★★
-            };
+// --- 3. ユーティリティ関数 ---
 
-            try {
-                // fetchで君のAIサーバーに接続！
-                const response = await fetch(AI_SERVER_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestData)
-                });
+// HTMLにメッセージを表示する関数
+function displayMessage(role, content) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = role === 'user' ? 'message-user' : 'message-ai';
+    messageDiv.innerText = content;
+    outputArea.appendChild(messageDiv);
+    outputArea.scrollTop = outputArea.scrollHeight; // スクロールを一番下へ
+}
 
-                if (!response.ok) {
-                    throw new Error(`HTTPエラー！ステータス: ${response.status}`);
-                }
+// サーバー状態を表示する関数 (UIから削除したが、エラー時の処理として残す)
+function updateServerStatus(isSuccess) {
+    if (isSuccess) {
+        // 成功時は何もしない
+        serverStatus.innerHTML = ``;
+    } else {
+         // エラー時のみ表示
+        serverStatus.innerHTML = `
+            <span class="font-bold">❌ 接続エラー！</span> サーバーが起動しているか確認してね。
+        `;
+        serverStatus.style.backgroundColor = '#fefcbf'; 
+        serverStatus.style.color = '#9f580a';
+        serverStatus.style.display = 'block'; // エラー時だけ表示を戻す
+    }
+}
 
-                const data = await response.json();
-                
-                // 4. AIからの応答を画面に表示！
-                const aiResponseText = data.response;
-                addMessageToChat('assistant', aiResponseText);
+// Enterキーでの送信を可能にする
+function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // 改行を防ぐ
+        sendQuestionToAI(); 
+    }
+}
 
-                // ★★★ 5. AIの応答も履歴リストに追加して記憶を更新！ ★★★
-                conversationHistory.push({ role: 'assistant', content: aiResponseText });
+// --- 4. メインの送信ロジック（単一サーバー接続＋履歴保存） ---
 
-            } catch (error) {
-                // 通信失敗！サーバーが起動しているか確認してね！
-                console.error('API通信エラー:', error);
-                const errorMessage = 'ごめん！AIサーバーと通信できなかったよ...😭 サーバー（Anaconda Promptの画面）が動いているか確認してね！';
-                addMessageToChat('assistant', errorMessage);
-                
-                // エラー時はユーザーの最後の質問を履歴から削除（未回答のため）
-                conversationHistory.pop();
+async function sendQuestionToAI() {
+    const prompt = inputField.value.trim();
+    if (!prompt) {
+        return;
+    }
+    
+    const userMessage = { role: "user", content: prompt };
+    
+    // 画面にユーザーメッセージを表示
+    displayMessage('user', prompt); 
+    inputField.value = '';
 
-            } finally {
-                // UIを元に戻す
-                loadingMessage.classList.add('hidden');
-                submitButton.disabled = false;
-            }
-        }
+    // 🐢 ローディング表示開始
+    loadingMessage.classList.remove('hidden');
+    submitButton.disabled = true;
+    
+    const requestData = {
+        prompt: prompt,
+        max_tokens: 500,
+        temperature: 0.7,
+        // 過去の履歴を送る
+        history: conversationHistory
+    };
 
-        // Enterキーで送信できるようにする
-        inputField.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); // 改行を防ぐ
-                sendQuestionToAI();
-            }
+    let successful = false;
+
+    try {
+        const response = await fetch(SERVER_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
         });
-    </script>
+
+        if (!response.ok) {
+            // サーバーは応答したが、エラーコードが返ってきた（例: 500エラー）
+            throw new Error(`AIサーバーからエラー応答: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // 成功！
+        successful = true;
+        const aiResponseText = data.response;
+        
+        // ユーザーメッセージとAI応答を正式な履歴に追加
+        const aiMessage = { role: "assistant", content: aiResponseText };
+        conversationHistory.push(userMessage); // ユーザーメッセージを履歴に追加！
+        conversationHistory.push(aiMessage);
+        
+        // LocalStorageに保存！
+        saveHistory(); 
+
+        // 画面にAI応答を表示
+        displayMessage('ai', aiResponseText); 
+        updateServerStatus(true); // 成功ステータス
+
+    } catch (error) {
+        // サーバーと通信できなかった、またはサーバーがエラーを返した
+        console.error(`サーバーとの通信に失敗:`, error.message);
+        const errorMessage = 'ごめん！AIサーバーと通信できなかったよ...😭 サーバーが動いているか確認してね！';
+        displayMessage('system', errorMessage);
+        updateServerStatus(false); // 失敗ステータス
+    }
+    
+    loadingMessage.classList.add('hidden');
+    submitButton.disabled = false;
+}
+
+// --- 5. 初期チェックと履歴ロード ---
+window.onload = () => {
+    // 履歴をLocalStorageから読み込む
+    const loaded = initializeHistory(); 
+
+    // 履歴がなかったら、初期メッセージを表示
+    if (!loaded) {
+        outputArea.innerHTML = `
+            <div class="message-system">
+                さあ、質問を入力して、まっちゃAIと会話を始めよう！
+            </div>
+        `;
+    }
+    
+    // 成功時のサーバー状態表示は行わない
+
+    // 履歴件数を更新の代わりに、クリア機能の初期化を行う (画像にはないが、機能は残す)
+    // const clearButton = document.getElementById('clear_history_button');
+    // if (clearButton) {
+    //     clearButton.onclick = clearHistory;
+    // }
+};
+
+</script>
 </body>
 </html>
