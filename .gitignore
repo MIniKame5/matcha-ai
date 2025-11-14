@@ -1,0 +1,16 @@
+# 依存関係（巨大な道具箱）
+node_modules
+
+# 完成品フォルダ（自分のPCで作るやつ）
+dist
+
+# 秘密の合言葉ファイル
+.env
+.env.local
+.env.*.local
+
+# その他、OSが作るゴミファイルなど
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
