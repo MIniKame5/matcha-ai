@@ -6,22 +6,22 @@ import { getFirestore, type Firestore } from 'firebase/firestore';
 
 // --- Configuration for Authentication Project ---
 const authConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_AUTH_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_AUTH_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_AUTH_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_AUTH_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_AUTH_APP_ID,
+  apiKey: process.env.FIREBASE_AUTH_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_AUTH_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_AUTH_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_AUTH_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_AUTH_APP_ID,
 };
 
 // --- Configuration for Database (Firestore) Project ---
 const dbConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_DB_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_DB_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_DB_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_DB_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_DB_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_DB_APP_ID,
+  apiKey: process.env.FIREBASE_DB_API_KEY,
+  authDomain: process.env.FIREBASE_DB_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_DB_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_DB_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_DB_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_DB_APP_ID,
 };
 
 let authApp: FirebaseApp | null = null;
@@ -34,6 +34,7 @@ const isDbConfigured = dbConfig.apiKey && dbConfig.projectId;
 
 if (isAuthConfigured) {
   try {
+    // Initialize the auth app with a unique name
     authApp = initializeApp(authConfig, 'authApp');
     auth = getAuth(authApp);
   } catch (error) {
@@ -45,6 +46,7 @@ if (isAuthConfigured) {
 
 if (isDbConfigured) {
   try {
+    // Initialize the database app with a unique name
     dbApp = initializeApp(dbConfig, 'dbApp');
     db = getFirestore(dbApp);
   } catch (error) {
@@ -54,5 +56,6 @@ if (isDbConfigured) {
   console.warn("Firebase DB config is missing. Chat history will not be saved.");
 }
 
+// The full functionality is considered configured only if both services are available.
 export const isFirebaseConfigured = !!auth && !!db;
 export { auth, db };

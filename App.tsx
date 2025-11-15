@@ -38,6 +38,7 @@ const App: React.FC = () => {
       });
       return unsubscribe;
     } else {
+      // Firebaseが未設定の場合、ログインしていない状態でアプリを初期化
       chatService.initializeChat(language);
       setMessages([]);
       setCurrentUser(null);
@@ -49,20 +50,11 @@ const App: React.FC = () => {
     setLanguage(newLang);
   };
   
-  const handleAuth = async (mode: 'login' | 'signup', username: string, pass: string) => {
-    const email = username.trim() + '@account.matcha-kame.com';
-    try {
-        if (mode === 'login') {
-            await signInUser(email, pass);
-        } else {
-            await signUpUser(email, pass);
-        }
-    } catch (error) {
-        if (error instanceof Error) {
-            alert(error.message);
-        } else {
-            alert('An unknown error occurred.');
-        }
+  const handleAuth = async (mode: 'login' | 'signup', email: string, pass: string) => {
+    if (mode === 'login') {
+      await signInUser(email, pass);
+    } else {
+      await signUpUser(email, pass);
     }
   };
 
