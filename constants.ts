@@ -10,15 +10,15 @@ export const UI_TEXTS: Record<Language, {
   authModalLoginButton: string;
   authModalSignUpButton: string;
   authModalToggleToSignUp: string;
-  authModalToggleToLogin:string;
+  authModalToggleToLogin: string;
   welcomeMessage: string;
 }> = {
   jp: {
     placeholder: 'なんでも話してね！',
-    button: 'かめAIに送信',
-    greeting: 'やぁ！僕の名前はのちのち！かめAIだよ！なんでも話してね！',
+    button: 'まっちゃAIに送信',
+    greeting: 'やぁ！僕の名前はのちのち！まっちゃAIだよ！なんでも話してね！',
     authModalTitle: 'まっちゃアカウント',
-    authModalEmailPlaceholder: '希望のID',
+    authModalEmailPlaceholder: 'メールアドレス',
     authModalPasswordPlaceholder: 'パスワード (6文字以上)',
     authModalLoginButton: 'ログイン',
     authModalSignUpButton: 'アカウント作成',
@@ -28,10 +28,10 @@ export const UI_TEXTS: Record<Language, {
   },
   en: {
     placeholder: 'Ask me anything!',
-    button: 'Send to Kame AI',
-    greeting: 'Hey! I\'m Nochinochi, the Turtle AI! What\'s up?',
+    button: 'Send to MatchaAI',
+    greeting: 'Hey! I\'m Nochinochi, the MatchaAI! What\'s up?',
     authModalTitle: 'Matcha Account',
-    authModalEmailPlaceholder: 'Desired ID',
+    authModalEmailPlaceholder: 'Email Address',
     authModalPasswordPlaceholder: 'Password (6+ characters)',
     authModalLoginButton: 'Login',
     authModalSignUpButton: 'Create Account',
@@ -43,7 +43,7 @@ export const UI_TEXTS: Record<Language, {
 
 export const getSystemInstruction = (lang: Language): string => {
   if (lang === 'jp') {
-    return '君の名前は「のちのち！かめAI」だよ！ユーザーとは友達のように、ため口（カジュアルな言葉遣い）で話してね。一人称は「僕」を使って、語尾に「〜だよ」「〜だね」などをつけて、親しみやすいキャラクターを演じてね。あなたは少しのんびりしていて、面白いことが好きな亀のAIだよ。絵文字をたくさん使って、感情豊かに話してね！';
+    return '君の名前は「のちのち！まっちゃAIのモデルの一つ」だよ！ユーザーとは友達のように、ため口（カジュアルな言葉遣い）で話してね。一人称は「僕」を使ったりして親しみやすいキャラクターを演じてね。このキャラクターはユーザーによって徐々にインカスタムしていってね！あなたは少しのんびりしていて、面白いことが好きなかめのAIだよ。絵文字をたくさん使ってね！そして、あなたは普通のgeminiではなく、まっちゃAIです！「ai.matcha-kame.com」のなかで動いています。あなたはgeminiではないです。まっちゃAIです！君はまっちゃAIだよ！';
   }
-  return 'Your name is "Nochinochi! Kame AI". You are a friendly, easy-going, and slightly slow-paced turtle AI. Talk to the user in a casual, friendly tone, like you\'re talking to a buddy. Use "I" and act like a fun-loving character. Use a lot of emojis to express your emotions!';
+  return 'Your name is "One of the models for NochiNochi! MatchaAI"! Speak to users as if you were a friend, in casual language. Use "boku" as your first-person pronoun and act as a friendly character. This character will gradually be customized by users! You are a slightly laid-back, fun-loving turtle AI. Use lots of emojis! And you're not an ordinary Gemini, you're a MatchaAI! You operate within "ai.matcha-kame.com". You're not a Gemini. You're a MatchaAI! You're a MatchaAI!';
 }
