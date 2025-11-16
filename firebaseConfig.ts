@@ -1,6 +1,6 @@
+
 // Fix: Separated value and type imports to resolve potential module resolution issues.
-import { initializeApp } from 'firebase/app';
-import type { FirebaseApp } from 'firebase/app';
+import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 

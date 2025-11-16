@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import type { User } from 'firebase/auth';
-import { MatchaIcon, UserIcon, LogoutIcon } from './Icons';
+import { MatchaIcon, UserIcon, LogoutIcon, MenuIcon } from './Icons';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Language } from '../types';
 
@@ -11,17 +12,21 @@ interface HeaderProps {
   onLogout: () => void;
   onLoginClick: () => void;
   isAuthDisabled?: boolean;
+  onToggleSidebar: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ language, onLanguageChange, currentUser, onLogout, onLoginClick, isAuthDisabled = false }) => {
+const Header: React.FC<HeaderProps> = ({ language, onLanguageChange, currentUser, onLogout, onLoginClick, isAuthDisabled = false, onToggleSidebar }) => {
   const [showMenu, setShowMenu] = useState(false);
 
   return (
     <header className="p-4 border-b border-gray-100 flex justify-between items-center flex-shrink-0">
       <div className="flex items-center gap-3">
-        <MatchaIcon className="w-8 h-8" />
+        <button onClick={onToggleSidebar} className="sm:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-full">
+          <MenuIcon className="w-6 h-6" />
+        </button>
+        <MatchaIcon className="w-8 h-8 hidden sm:block" />
         <h1 className="text-xl font-bold text-green-800 tracking-wider">
-          のちのち！かめAI
+          のちのち！まっちゃAI
         </h1>
       </div>
       <div className="flex items-center gap-2">

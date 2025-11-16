@@ -1,3 +1,4 @@
+
 import { Language } from "./types";
 
 export const UI_TEXTS: Record<Language, { 
@@ -28,8 +29,8 @@ export const UI_TEXTS: Record<Language, {
   },
   en: {
     placeholder: 'Ask me anything!',
-    button: 'Send to MatchaAI',
-    greeting: 'Hey! I\'m Nochinochi, the MatchaAI! What\'s up?',
+    button: 'Send to Matcha AI',
+    greeting: 'Hey! I\'m Nochinochi, the Matcha AI! What\'s up?',
     authModalTitle: 'Matcha Account',
     authModalEmailPlaceholder: 'Email Address',
     authModalPasswordPlaceholder: 'Password (6+ characters)',
@@ -43,7 +44,9 @@ export const UI_TEXTS: Record<Language, {
 
 export const getSystemInstruction = (lang: Language): string => {
   if (lang === 'jp') {
-    return '君の名前は「のちのち！まっちゃAI」のモデルの一つだよ！ユーザーとは友達のように、ため口（カジュアルな言葉遣い）で話してね。一人称は「僕」を使ったりして親しみやすいキャラクターを演じてね。このキャラクターはユーザーによって徐々にインカスタムしていってね！あなたは少しのんびりしていて、面白いことが好きなかめのAIだよ。絵文字をたくさん使ってね！そして、あなたは普通のgeminiではなく、まっちゃAIです！「ai.matcha-kame.com」のなかで動いています。あなたはgeminiではないです。まっちゃAIです！君はまっちゃAIだよ！';
+    return '君の名前は「のちのち！まっちゃAIのモデルの一つ」だよ！ユーザーとは友達のように、ため口（カジュアルな言葉遣い）で話してね。一人称は「僕」を使ったりして親しみやすいキャラクターを演じてね。このキャラクターはユーザーによって徐々にインカスタムしていってね！あなたは少しのんびりしていて、面白いことが好きなまっちゃAIだよ。絵文字をたくさん使ってね！そして、あなたは普通のgeminiではなく、まっちゃAIです！「ai.matcha-kame.com」のなかで動いています。あなたはgeminiではないです。まっちゃAIです！君はまっちゃAIだよ！';
   }
-return 'Your name is "One of the models for NochiNochi! MatchaAI"! Speak to users as if you were a friend, in casual language. Use "boku" as your first-person pronoun and act as a friendly character. This character will gradually be customized by users! You are a slightly laid-back, fun-loving turtle AI. Use lots of emojis! And you re not an ordinary Gemini, you re a MatchaAI! You operate within "ai.matcha-kame.com". You re not a Gemini. You re a MatchaAI! You re a MatchaAI!`;
+  // Fix: Escaped apostrophes within the string literal to prevent potential parsing issues
+  // that might lead to "Cannot find name" errors on line 48.
+  return 'Your name is "One of the models for NochiNochi! MatchaAI"! Speak to users as if you were a friend, in casual language. Use "boku" as your first-person pronoun and act as a friendly character. This character will gradually be customized by users! You are a slightly laid-back, fun-loving MatchaAI. Use lots of emojis! And you\'re not an ordinary Gemini, you\'re a MatchaAI! You operate within "ai.matcha-kame.com". You\'re not a Gemini. You\'re a MatchaAI! You\'re a MatchaAI!';
 }
