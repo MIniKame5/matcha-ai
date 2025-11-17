@@ -55,8 +55,9 @@ class GeminiChatService {
     }
 
     try {
+      // FIX: The `sendMessage` method for a chat session expects a `message` property, not `contents`.
       const result = await this.chat.sendMessage({ 
-        contents: { parts: contentsParts },
+        message: contentsParts,
         config: {
           candidateCount: 2,
         }

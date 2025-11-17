@@ -2,52 +2,43 @@ import { initializeApp, FirebaseApp } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
 
-const authConfig = {
-  apiKey: process.env.FIREBASE_AUTH_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_AUTH_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_AUTH_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_AUTH_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_AUTH_APP_ID,
-};
-const dbConfig = {
-  apiKey: process.env.FIREBASE_DB_API_KEY,
-  authDomain: process.env.FIREBASE_DB_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_DB_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_DB_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_DB_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_DB_APP_ID,
+// Firebase設定を一つに統合。通常、AuthとFirestoreは同じプロジェクト設定を共有します。
+// 環境変数から設定を読み込みます。
+const firebaseConfig = {
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
 };
 
-let authApp: FirebaseApp | null = null;
-let dbApp: FirebaseApp | null = null;
+let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
 
-const isAuthConfigured = authConfig.apiKey && authConfig.projectId;
-const isDbConfigured = dbConfig.apiKey && dbConfig.projectId;
+// 必要な設定（apiKeyとprojectId）が存在するかどうかを確認
+const isConfigured = firebaseConfig.apiKey && firebaseConfig.projectId;
 
-if (isAuthConfigured) {
+if (isConfigured) {
   try {
-    authApp = initializeApp(authConfig, 'authApp');
-    auth = getAuth(authApp);
+    // Firebaseアプリを初期化
+    app = initializeApp(firebaseConfig);
+    // 初期化したアプリからAuthとFirestoreのインスタンスを取得
+    auth = getAuth(app);
+    db = getFirestore(app);
   } catch (error) {
-    console.error("Firebase Auth initialization failed:", error);
+    console.error("Firebase initialization failed:", error);
+    // 初期化に失敗した場合は、すべてnullにリセット
+    app = null;
+    auth = null;
+    db = null;
   }
 } else {
-  console.warn("Firebase Auth config is missing. Authentication will be disabled.");
+  // 設定が不完全な場合は警告を表示
+  console.warn("Firebase config is missing. Firebase features will be disabled. Please set up Firebase environment variables.");
 }
 
-if (isDbConfigured) {
-  try {
-    dbApp = initializeApp(dbConfig, 'dbApp');
-    db = getFirestore(dbApp);
-  } catch (error) {
-    console.error("Firebase DB initialization failed:", error);
-  }
-} else {
-  console.warn("Firebase DB config is missing. Chat history will not be saved.");
-}
-
+// 設定が完了しているかどうかを示すフラグと、Auth/DBインスタンスをエクスポート
 export const isFirebaseConfigured = !!auth && !!db;
 export { auth, db };
